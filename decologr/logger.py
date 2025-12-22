@@ -477,3 +477,24 @@ class Logger:
         Logger.message(f"Success Rate: {success_rate:.1f}%", stacklevel=stacklevel)
         Logger.message("=" * 100, stacklevel=3)
 
+
+def log_exception(exception: Exception, message: str, stacklevel: int = 4) -> None:
+    """
+    Log an exception with a descriptive message.
+    
+    This function provides a convenient way to log exceptions, matching the
+    signature used by mxlib.core.exception.log.log_exception for compatibility.
+    
+    Args:
+        exception: The exception to log
+        message: Descriptive message about the error context
+        stacklevel: Stack level for logging (default: 4)
+    
+    Example:
+        try:
+            # some code
+        except Exception as ex:
+            log_exception(ex, "Error initializing scheduler database")
+    """
+    Logger.error(message, exception=exception, stacklevel=stacklevel)
+
