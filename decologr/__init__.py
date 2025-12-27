@@ -13,5 +13,5 @@ from decologr.logger import (
     log_exception,
 )
 
-__all__ = ["Logger", "cleanup_logging", "setup_logging", "set_project_name", "get_project_name", "log_exception"]
+__all__ = ["Decologr", "cleanup_logging", "setup_logging", "set_project_name", "get_project_name", "log_exception"]
 
