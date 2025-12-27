@@ -233,7 +233,7 @@ def get_project_name() -> str:
     return _project_name
 
 
-class Logger:
+class Decologr:
     def __init__(self):
         pass
 
