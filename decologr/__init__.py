@@ -5,7 +5,7 @@ A logging utility with emoji decorations and structured message formatting.
 """
 
 from decologr.logger import (
-    Logger,
+    Decologr,
     cleanup_logging,
     setup_logging,
     set_project_name,
