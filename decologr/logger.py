@@ -42,9 +42,9 @@ _DEFAULT_PROJECT_NAME = "decologr"
 
 def cleanup_logging(logger: logging.Logger) -> None:
     """Clean up logging handlers to prevent resource warnings."""
-    for handler in logger.handlers:
+    for handler in Decologr.handlers:
         handler.close()
-    logger.handlers.clear()
+    Decologr.handlers.clear()
 
 
 def setup_logging(verbose: bool = False, project_name: str = _DEFAULT_PROJECT_NAME) -> object:
@@ -99,7 +99,7 @@ def setup_logging(verbose: bool = False, project_name: str = _DEFAULT_PROJECT_NA
         logging.root.addHandler(console_handler)
 
         logger = logging.getLogger(project_name)
-        logger.info(f"{project_name} starting up with log file {log_file}...")
+        Decologr.info(f"{project_name} starting up with log file {log_file}...")
         logging.getLogger("OpenGL").setLevel(logging.WARNING)
         return logger
 
@@ -135,24 +135,24 @@ def _apply_log_level_comprehensive(level_name: str, project_name: str = _DEFAULT
 
         # Set root logger level
         root_logger = logging.getLogger()
-        root_logger.setLevel(numeric_level)
+        root_Decologr.setLevel(numeric_level)
 
         # Set all handler levels to match
-        for handler in root_logger.handlers:
+        for handler in root_Decologr.handlers:
             handler.setLevel(numeric_level)
 
         # Set ALL existing loggers to the new level
-        for logger_name in logging.Logger.manager.loggerDict:
+        for logger_name in logging.Decologr.manager.loggerDict:
             logger = logging.getLogger(logger_name)
-            logger.setLevel(numeric_level)
+            Decologr.setLevel(numeric_level)
 
         # Set project-specific logger level
         project_logger = logging.getLogger(project_name)
-        project_logger.setLevel(numeric_level)
+        project_Decologr.setLevel(numeric_level)
 
         # Set OpenGL logger level
         opengl_logger = logging.getLogger("OpenGL")
-        opengl_logger.setLevel(numeric_level)
+        opengl_Decologr.setLevel(numeric_level)
 
     except Exception as ex:
         print(f"⚠️ Error applying log level {level_name}: {ex}")
@@ -225,7 +225,7 @@ def set_project_name(project_name: str) -> None:
 
 
 def get_project_name() -> str:
-    """Get the current project name used by Logger.
+    """Get the current project name used by Decologr.
     
     Returns:
         Current project name
@@ -234,6 +234,7 @@ def get_project_name() -> str:
 
 
 class Decologr:
+    """Decologr is a simple logging utility that provides additional features and convenience methods."""
     def __init__(self):
         pass
 
@@ -256,7 +257,7 @@ class Decologr:
             #   => "could not open %s (ValueError: bad)"
             message = f"{message} ({exception.__class__.__name__}: {exception})"
 
-        Logger.message(
+        Decologr.message(
             message,
             *args,
             stacklevel=stacklevel,
@@ -285,7 +286,7 @@ class Decologr:
             #   => "could not open %s (ValueError: bad)"
             message = f"{message} ({exception.__class__.__name__}: {exception})"
 
-        Logger.message(
+        Decologr.message(
             message,
             *args,
             stacklevel=stacklevel,
@@ -302,7 +303,7 @@ class Decologr:
             try:
                 data = json.loads(data)
             except json.JSONDecodeError:
-                Logger.message(
+                Decologr.message(
                     "Invalid JSON string provided.", level=logging.WARNING, stacklevel=3
                 )
                 return
@@ -310,11 +311,11 @@ class Decologr:
         try:
             compact_json = json.dumps(data, separators=(",", ":"))
         except (TypeError, ValueError) as e:
-            Logger.error("Failed to serialize JSON", exception=e)
+            Decologr.error("Failed to serialize JSON", exception=e)
             return
 
         if not silent:
-            Logger.message(compact_json, stacklevel=3)
+            Decologr.message(compact_json, stacklevel=3)
 
     @staticmethod
     def message(
@@ -426,7 +427,7 @@ class Decologr:
         padded_type = f"{type_name:<12}"
         final_message = f"{padded_message} {padded_type} {formatted_value}".rstrip()
 
-        Logger.message(final_message, silent=silent, stacklevel=stacklevel, level=level)
+        Decologr.message(final_message, silent=silent, stacklevel=stacklevel, level=level)
 
     @staticmethod
     def header_message(
@@ -446,11 +447,11 @@ class Decologr:
         full_separator = f"{'=' * 142}"
         separator = f"{'=' * 100}"
 
-        Logger.message(
+        Decologr.message(
             f"\n{full_separator}", level=level, stacklevel=stacklevel, silent=silent
         )
-        Logger.message(f"{message}", level=level, stacklevel=stacklevel, silent=silent)
-        Logger.message(separator, level=level, stacklevel=stacklevel, silent=silent)
+        Decologr.message(f"{message}", level=level, stacklevel=stacklevel, silent=silent)
+        Decologr.message(separator, level=level, stacklevel=stacklevel, silent=silent)
 
     @staticmethod
     def debug_info(successes: list, failures: list, stacklevel: int = 3) -> None:
@@ -470,12 +471,12 @@ class Decologr:
         total = len(successes) + len(failures)
         success_rate = (len(successes) / total * 100) if total else 0.0
 
-        Logger.message(
+        Decologr.message(
             f"Successes ({len(successes)}): {successes}", stacklevel=stacklevel
         )
-        Logger.message(f"Failures ({len(failures)}): {failures}", stacklevel=stacklevel)
-        Logger.message(f"Success Rate: {success_rate:.1f}%", stacklevel=stacklevel)
-        Logger.message("=" * 100, stacklevel=3)
+        Decologr.message(f"Failures ({len(failures)}): {failures}", stacklevel=stacklevel)
+        Decologr.message(f"Success Rate: {success_rate:.1f}%", stacklevel=stacklevel)
+        Decologr.message("=" * 100, stacklevel=3)
 
 
 def log_exception(exception: Exception, message: str, stacklevel: int = 4) -> None:
@@ -496,5 +497,5 @@ def log_exception(exception: Exception, message: str, stacklevel: int = 4) -> No
         except Exception as ex:
             log_exception(ex, "Error initializing scheduler database")
     """
-    Logger.error(message, exception=exception, stacklevel=stacklevel)
+    Decologr.error(message, exception=exception, stacklevel=stacklevel)
 
