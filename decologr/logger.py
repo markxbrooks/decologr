@@ -327,7 +327,7 @@ class Decologr:
     ) -> None:
 
         if args:
-            # Only perform printf-formatting when args provided
+            # --- Only perform printf-formatting when args provided
             try:
                 formatted_message = format_string % args
             except Exception as ex:
@@ -338,7 +338,10 @@ class Decologr:
         full_message = decorate_log_message(formatted_message, level)
         if LOGGING and not silent:
             logger = logging.getLogger(_project_name)
-            logger.log(level, full_message, stacklevel=stacklevel)
+            try:
+                logger.log(level, full_message, stacklevel=stacklevel)
+            except Exception as ex:
+                print(f"Error logging message: {ex}") # Maybe another process got there first
 
     debug = message
     info = message
