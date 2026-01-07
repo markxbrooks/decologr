@@ -42,9 +42,9 @@ _DEFAULT_PROJECT_NAME = "decologr"
 
 def cleanup_logging(logger: logging.Logger) -> None:
     """Clean up logging handlers to prevent resource warnings."""
-    for handler in logger.handlers:
+    for handler in Decologr.handlers:
         handler.close()
-    logger.handlers.clear()
+    Decologr.handlers.clear()
 
 
 def setup_logging(verbose: bool = False, project_name: str = _DEFAULT_PROJECT_NAME) -> object:
@@ -99,7 +99,7 @@ def setup_logging(verbose: bool = False, project_name: str = _DEFAULT_PROJECT_NA
         logging.root.addHandler(console_handler)
 
         logger = logging.getLogger(project_name)
-        logger.info(f"{project_name} starting up with log file {log_file}...")
+        Decologr.info(f"{project_name} starting up with log file {log_file}...")
         logging.getLogger("OpenGL").setLevel(logging.WARNING)
         return logger
 
@@ -135,24 +135,24 @@ def _apply_log_level_comprehensive(level_name: str, project_name: str = _DEFAULT
 
         # Set root logger level
         root_logger = logging.getLogger()
-        root_logger.setLevel(numeric_level)
+        root_Decologr.setLevel(numeric_level)
 
         # Set all handler levels to match
-        for handler in root_logger.handlers:
+        for handler in root_Decologr.handlers:
             handler.setLevel(numeric_level)
 
         # Set ALL existing loggers to the new level
         for logger_name in logging.Decologr.manager.loggerDict:
             logger = logging.getLogger(logger_name)
-            logger.setLevel(numeric_level)
+            Decologr.setLevel(numeric_level)
 
         # Set project-specific logger level
         project_logger = logging.getLogger(project_name)
-        project_logger.setLevel(numeric_level)
+        project_Decologr.setLevel(numeric_level)
 
         # Set OpenGL logger level
         opengl_logger = logging.getLogger("OpenGL")
-        opengl_logger.setLevel(numeric_level)
+        opengl_Decologr.setLevel(numeric_level)
 
     except Exception as ex:
         print(f"⚠️ Error applying log level {level_name}: {ex}")
@@ -234,6 +234,7 @@ def get_project_name() -> str:
 
 
 class Decologr:
+    """Decologr is a simple logging utility that provides additional features and convenience methods."""
     def __init__(self):
         pass
 
@@ -326,7 +327,7 @@ class Decologr:
     ) -> None:
 
         if args:
-            # Only perform printf-formatting when args provided
+            # --- Only perform printf-formatting when args provided
             try:
                 formatted_message = format_string % args
             except Exception as ex:
@@ -337,7 +338,10 @@ class Decologr:
         full_message = decorate_log_message(formatted_message, level)
         if LOGGING and not silent:
             logger = logging.getLogger(_project_name)
-            logger.log(level, full_message, stacklevel=stacklevel)
+            try:
+                logger.log(level, full_message, stacklevel=stacklevel)
+            except Exception as ex:
+                print(f"Error logging message: {ex}") # Maybe another process got there first
 
     debug = message
     info = message
