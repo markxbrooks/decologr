@@ -15,6 +15,15 @@
 
 A single file logging utility with emoji decorations and structured message formatting.
 
+```python
+setup_logging(verbose=True, project_name="myproject")
+╭─────────── myproject ────────────╮
+│  myproject Application Starting  │
+╰──────────────────────────────────╯
+[...] INFO     ℹ️ myproject starting up with log file
+                             .../.myproject/logs/myproject-...
+```
+
 ## Features
 
 - **Emoji Decorations**: Automatic emoji decorations based on log level and message content
