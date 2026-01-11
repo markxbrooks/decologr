@@ -28,6 +28,9 @@ setup(
     install_requires=[],
     extras_require={
         "numpy": ["numpy>=1.20.0"],
+        "rich": ["rich>=13.0.0"],
+        "textual": ["textual>=0.40.0"],
+        "all": ["numpy>=1.20.0", "rich>=13.0.0", "textual>=0.40.0"],
     },
 )
 
