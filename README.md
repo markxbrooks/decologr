@@ -42,7 +42,7 @@ pip install -e .
 ## Quick Start
 
 ```python
-from decologr import Logger, set_project_name, setup_logging
+from decologr import Decologr, set_project_name, setup_logging
 
 # Set project name (optional, defaults to "decologr")
 set_project_name("myproject")
@@ -51,9 +51,9 @@ set_project_name("myproject")
 setup_logging(verbose=True, project_name="myproject")
 
 # Use Logger
-Logger.info("Hello, world!")
-Logger.error("Something went wrong", exception=ValueError("test"))
-Logger.json({"key": "value"})
+Decologr.info("Hello, world!")
+Decologr.error("Something went wrong", exception=ValueError("test"))
+Decologr.json({"key": "value"})
 ```
 
 ## Usage
@@ -61,17 +61,18 @@ Logger.json({"key": "value"})
 ### Basic Logging
 
 ```python
-from decologr import Logger
+from decologr import Decologr
 
-Logger.info("Information message")
-Logger.warning("Warning message")
-Logger.error("Error message")
-Logger.debug("Debug message")
+Decologr.info("Information message")
+Decologr.warning("Warning message")
+Decologr.error("Error message")
+Decologr.debug("Debug message")
 ```
 
 ### Logging with Exceptions
 
 ```python
+from decologr import Decologr
 try:
     result = 1 / 0
 except ZeroDivisionError as e:
@@ -100,6 +101,7 @@ except Exception as ex:
 ### JSON Logging
 
 ```python
+from decologr import Decologr
 data = {"user": "alice", "action": "login"}
 Decologr.json(data)  # Compact JSON (or pretty if Rich is enabled)
 
@@ -122,6 +124,8 @@ Decologr.json(data, pretty=None)  # Default behavior
 ### Parameter Logging
 
 ```python
+from decologr import Decologr
+
 Decologr.parameter("User ID", user_id)
 Decologr.parameter("Settings", {"theme": "dark", "lang": "en"})
 
@@ -149,6 +153,7 @@ Decologr.parameter("Users", users, use_rich=True)
 ### Header Messages
 
 ```python
+from decologr import Decologr
 Decologr.header_message("Starting Processing")
 
 # With Rich installed, headers display as formatted panels
@@ -211,7 +216,7 @@ Rich formatting is **optional** - decologr works perfectly without it, maintaini
 
 ## Textual Log Viewer
 
-When Textual is installed, decologr provides a beautiful log viewer component that can be integrated into editors like JDXI:
+When Textual is installed, decologr provides a beautiful log viewer component that can be integrated into programs like JDXI Editor:
 
 ```python
 from decologr.viewer import create_log_viewer_widget
@@ -247,30 +252,30 @@ python -m decologr.viewer
 
 All methods are static methods:
 
-- `Logger.info(message, *args, level=logging.INFO, stacklevel=3, silent=False)`
-- `Logger.debug(message, *args, level=logging.DEBUG, stacklevel=3, silent=False)`
-- `Logger.warning(message, *args, exception=None, level=logging.WARNING, stacklevel=4, silent=False, use_rich_traceback=None)` - Log warning
+- `Decologr.info(message, *args, level=logging.INFO, stacklevel=3, silent=False)`
+- `Decologr.debug(message, *args, level=logging.DEBUG, stacklevel=3, silent=False)`
+- `Decologr.warning(message, *args, exception=None, level=logging.WARNING, stacklevel=4, silent=False, use_rich_traceback=None)` - Log warning
   - `use_rich_traceback=True`: Use Rich traceback formatting (requires Rich)
   - `use_rich_traceback=False`: Always use standard traceback
   - `use_rich_traceback=None`: Auto-detect (uses Rich if available)
-- `Logger.error(message, *args, exception=None, level=logging.ERROR, stacklevel=4, silent=False, use_rich_traceback=None)` - Log error
+- `Decologr.error(message, *args, exception=None, level=logging.ERROR, stacklevel=4, silent=False, use_rich_traceback=None)` - Log error
   - `use_rich_traceback=True`: Use Rich traceback formatting (requires Rich)
   - `use_rich_traceback=False`: Always use standard traceback
   - `use_rich_traceback=None`: Auto-detect (uses Rich if available)
-- `Logger.json(data, silent=False, pretty=None)` - Log JSON data
+- `Decologr.json(data, silent=False, pretty=None)` - Log JSON data
   - `pretty=True`: Use Rich pretty-printing (requires Rich)
   - `pretty=False`: Always use compact format
   - `pretty=None`: Auto-detect (uses Rich if available)
-- `Logger.parameter(message, parameter, float_precision=2, max_length=300, level=logging.INFO, stacklevel=4, silent=False, use_rich=None)` - Log structured parameter
+- `Decologr.parameter(message, parameter, float_precision=2, max_length=300, level=logging.INFO, stacklevel=4, silent=False, use_rich=None)` - Log structured parameter
   - `use_rich=True`: Use Rich tables/trees (requires Rich)
   - `use_rich=False`: Always use text-based formatting
   - `use_rich=None`: Auto-detect (uses Rich if available)
-- `Logger.header_message(message, level=logging.INFO, silent=False, stacklevel=3, use_rich=None, title=None)` - Log header message
+- `Decologr.header_message(message, level=logging.INFO, silent=False, stacklevel=3, use_rich=None, title=None)` - Log header message
   - `use_rich=True`: Use Rich panel formatting (requires Rich)
   - `use_rich=False`: Always use text-based separator lines
   - `use_rich=None`: Auto-detect (uses Rich if available)
   - `title`: Optional custom title for Rich panel
-- `Logger.debug_info(successes, failures, stacklevel=3)`
+- `Decologr.debug_info(successes, failures, stacklevel=3)`
 
 ### Functions
 
@@ -284,11 +289,31 @@ All methods are static methods:
 - `set_project_name(project_name)` - Set the project name for logging
 - `get_project_name()` - Get the current project name
 
+## Example Output:
+```python
+from decologr import Decologr, set_project_name, setup_logging
+
+# Set project name (optional, defaults to "decologr")
+set_project_name("myproject")
+# Setup logging (optional)
+setup_logging(verbose=True, project_name="myproject")
+╭─────────── myproject ────────────╮
+│  myproject Application Starting  │
+╰──────────────────────────────────╯
+[...] INFO     ℹ️ myproject starting up with log file
+                             .../.myproject/logs/myproject-...
+<Logger myproject (INFO)>
+# Use Logger
+Decologr.info("Hello, world!") 
+                    INFO     ℹ️ Hello, world!
+Decologr.error("Something went wrong", exception=ValueError("test"))
+```
+
 ## License
 
 MIT License
 
 ## Author
 
-Part of the mxflask project.
+Originally part of the JDXi Editor project.
 

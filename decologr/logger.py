@@ -12,6 +12,31 @@ Functions:
     setup_logging(verbose, project_name): Sets up comprehensive logging to both file and console.
     decorate_log_message(message, level, decorate): Adds decorations to log messages.
     get_qc_tag(msg): Generates QC emojis based on message content.
+
+Example Usage:
+==============
+>>> from decologr import Decologr, set_project_name, setup_logging
+
+>>> # Set project name (optional, defaults to "decologr")
+>>> set_project_name("myproject")
+>>> # Setup logging (optional)
+>>> setup_logging(verbose=True, project_name="myproject") # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+╭─────────── myproject ────────────╮
+│  myproject Application Starting  │
+╰──────────────────────────────────╯
+[...] INFO     ℹ️ myproject starting up with log file
+                             .../.myproject/logs/myproject-...
+<Logger myproject (INFO)>
+>>> # Use Logger
+>>> Decologr.info("Hello, world!") # doctest: +NORMALIZE_WHITESPACE
+                    INFO     ℹ️ Hello, world!
+>>> Decologr.error("Something went wrong", exception=ValueError("test")) # doctest: +NORMALIZE_WHITESPACE
+❌ Something went wrong
+ValueError: test
+>>> Decologr.json({"key": "value"})# doctest: +NORMALIZE_WHITESPACE
+{
+  "key": "value"
+}
 """
 
 import json
@@ -72,9 +97,12 @@ class _RichFileHandler(RotatingFileHandler):
     def __init__(self, filename, mode='a', maxBytes=0, backupCount=0, encoding=None, delay=False):
         """Initialize the Rich file handler."""
         super().__init__(filename, mode, maxBytes, backupCount, encoding, delay)
-        # Create a standard formatter to match the expected format
+        # Create a standard formatter to match RichHandler console output format
+        # RichHandler format: [HH:MM:SS] LEVEL     message
+        # We'll match this structure for consistency
         self.formatter = logging.Formatter(
-            "%(filename)-20s| %(lineno)-5s| %(levelname)-8s| %(message)-24s"
+            "[%(asctime)s] %(levelname)-8s %(message)s",
+            datefmt="%H:%M:%S"
         )
         if HAS_RICH:
             # Create a Console that writes to the file
@@ -188,7 +216,8 @@ def setup_logging(
                 encoding="utf-8",
             )
             file_formatter = logging.Formatter(
-                "%(filename)-20s| %(lineno)-5s| %(levelname)-8s| %(message)-24s"
+                "[%(asctime)s] %(levelname)-8s %(message)s",
+                datefmt="%H:%M:%S"
             )
             file_handler.setFormatter(file_formatter)
         
@@ -196,7 +225,7 @@ def setup_logging(
 
         # Configure console logging
         if should_use_rich and HAS_RICH:
-            # Use Rich handler for beautiful console output
+            # Use Rich handler for console output
             console_handler = RichHandler(
                 console=Console(stderr=False),
                 show_path=False,
@@ -784,6 +813,113 @@ class Decologr:
 
     debug = message
     info = message
+    
+    @staticmethod
+    def critical(
+        message: str,
+        *args,
+        exception: Optional[Exception] = None,
+        level: int = logging.CRITICAL,
+        stacklevel: int = 4,
+        silent: bool = False,
+        use_rich_traceback: Optional[bool] = None,
+    ) -> None:
+        """
+        Log a critical message, optionally with an exception, and support lazy formatting.
+        
+        Args:
+            message: Critical message
+            *args: Format arguments for message
+            exception: Optional exception to log
+            level: Logging level (default: CRITICAL)
+            stacklevel: Stack level for logging
+            silent: If True, don't output anything
+            use_rich_traceback: If True, use Rich traceback formatting (when Rich is available).
+                               If None, auto-detect (uses Rich if available).
+                               If False, use standard traceback formatting.
+        """
+        if silent:
+            return
+
+        # Determine if we should use Rich traceback
+        use_rich = False
+        if exception is not None and HAS_RICH and Traceback is not None:
+            if use_rich_traceback is None:
+                # Auto-detect: use Rich if RichHandler is available
+                use_rich = _is_rich_handler_available()
+            elif use_rich_traceback is True:
+                use_rich = True
+
+        if exception is not None and use_rich:
+            # Use Rich traceback for beautiful exception display
+            try:
+                console = Console(stderr=False)
+                
+                # Format message with args if provided
+                if args:
+                    try:
+                        formatted_message = message % args
+                    except Exception:
+                        formatted_message = message
+                else:
+                    formatted_message = message
+                
+                # Print critical message in bold red
+                console.print(f"[bold red on white]💥 {formatted_message}[/bold red on white]")
+                
+                # Print Rich traceback
+                traceback = Traceback.from_exception(
+                    type(exception),
+                    exception,
+                    exception.__traceback__,
+                    show_locals=False,  # Don't show local variables by default
+                )
+                console.print(traceback)
+                
+                # Also log compact version to file handlers
+                exc_info = f"({exception.__class__.__name__}: {exception})"
+                file_message = f"{formatted_message} {exc_info}"
+                
+                # Temporarily remove console handlers, log, then restore
+                logger = logging.getLogger(_project_name)
+                root_logger = logging.root
+                
+                console_handlers = []
+                for handler in list(logger.handlers):
+                    if isinstance(handler, (RichHandler, logging.StreamHandler)):
+                        console_handlers.append((handler, logger))
+                        logger.removeHandler(handler)
+                for handler in list(root_logger.handlers):
+                    if isinstance(handler, (RichHandler, logging.StreamHandler)):
+                        if not any(h == handler for h, _ in console_handlers):
+                            console_handlers.append((handler, root_logger))
+                            root_logger.removeHandler(handler)
+                
+                # Log to file handlers
+                Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level)
+                
+                # Restore console handlers
+                for handler, source_logger in console_handlers:
+                    source_logger.addHandler(handler)
+                
+                return
+                
+            except Exception as e:
+                # Fallback to standard formatting if Rich traceback fails
+                Decologr.warning(f"Rich traceback formatting failed, using standard format: {e}", stacklevel=stacklevel)
+        
+        # Standard formatting (fallback or when Rich not available)
+        if exception is not None:
+            # Append the exception AFTER the message but do NOT disturb printf args
+            message = f"{message} ({exception.__class__.__name__}: {exception})"
+
+        Decologr.message(
+            message,
+            *args,
+            stacklevel=stacklevel,
+            silent=silent,
+            level=level,
+        )
 
     @staticmethod
     def parameter(
