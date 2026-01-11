@@ -13,7 +13,7 @@
 
 # decologr - Decorative Logger
 
-A logging utility with emoji decorations and structured message formatting.
+A single file logging utility with emoji decorations and structured message formatting.
 
 ## Features
 
