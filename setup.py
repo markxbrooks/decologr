@@ -11,7 +11,7 @@ setup(
     description="Decorative Logger - A logging utility with emoji decorations",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/mxflask/decologr",
+    url="https://github.com/markxbrooks/decologr",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
