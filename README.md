@@ -320,6 +320,9 @@ setup_logging(verbose=True, project_name="myproject")
 Decologr.info("Hello, world!") 
                     INFO     ℹ️ Hello, world!
 Decologr.error("Something went wrong", exception=ValueError("test"))
+{
+  "key": "value"
+}
 ```
 
 ## License
