@@ -47,4 +47,15 @@ except ImportError:
         "get_project_name",
         "log_exception",
     ]
+except TypeError:
+    __all__ = [
+        "Decologr",
+        "Logger",  # Backward compatibility alias
+        "cleanup_logging",
+        "setup_logging",
+        "set_project_name",
+        "get_project_name",
+        "log_exception",
+    ]
+
 
