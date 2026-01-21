@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="decologr",
-    version="0.1.0",
+    version="0.21.0",
     author="Mark Brooks",
     author_email="",
     description="Decorative Logger - A logging utility with emoji decorations",
