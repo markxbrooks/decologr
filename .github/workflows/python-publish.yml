@@ -15,6 +15,42 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Debug git/tag info
+        run: |
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "GITHUB_REF_NAME: $GITHUB_REF_NAME"
+          git rev-parse --verify HEAD
+          git show -s --format='%H %an %ar' HEAD
+          git tag --points-at HEAD || true
+          echo "pyproject before any change:"
+          sed -n '1,120p' pyproject.toml || true
+
+      - name: Extract version from release tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Building version $VERSION"
+
+      - name: Inject version into pyproject.toml (robust)
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "Setting pyproject version to $VERSION"
+          sed -i 's/^[[:space:]]*version[[:space:]]*=[[:space:]]*.*/version = "'"${VERSION}"'"/' pyproject.toml
+          echo "pyproject after injection:"
+          sed -n '1,120p' pyproject.toml
+
+      - name: Build release distributions
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+
+      - name: Inspect built artifacts
+        run: |
+          ls -l dist
+          unzip -p dist/*.whl */METADATA | grep -E '^Name:|^Version:' || true
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
