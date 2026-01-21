@@ -1,106 +1,70 @@
-# Upload Python Package on GitHub Release published
-# - Injects the tag version into pyproject.toml before building
-# - Builds once
-# - Uploads dists as a workflow artifact and as release assets
-# - Publishes to PyPI in a dependent job
+# This workflow will upload a Python Package to PyPI when a release is created
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Upload Python Package
+
 on:
   release:
     types: [published]
 
-name: Upload Python Package
-
-# Grant write permission to repo contents so we can attach assets to the release.
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   release-build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source (fetch tags)
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
 
-      - name: Debug git/tag info
-        run: |
-          echo "GITHUB_REF: $GITHUB_REF"
-          echo "GITHUB_REF_NAME: $GITHUB_REF_NAME"
-          git rev-parse --verify HEAD
-          git show -s --format='%H %an %ar' HEAD
-          git tag --points-at HEAD || true
-          echo "pyproject before any change:"
-          sed -n '1,200p' pyproject.toml || true
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
 
-      - name: Extract version from release tag
-        id: get_version
-        run: |
-          # Remove a leading "v" if present
-          TAG="${GITHUB_REF_NAME}"
-          VERSION="${TAG#v}"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "Building version $VERSION"
-
-      - name: Inject version into pyproject.toml
-        run: |
-          # Replace the version line with the release tag's version (keeps quoting correct)
-          sed -i "s/^version = .*/version = \"${{ steps.get_version.outputs.version }}\"/" pyproject.toml || true
-          echo "pyproject after injection:"
-          grep '^version' pyproject.toml || true
-
-      - name: Install build tools
-        run: |
-          python -m pip install --upgrade pip build
-
       - name: Build release distributions
         run: |
+          # NOTE: put your own distribution build steps here.
+          python -m pip install build
           python -m build
 
-      - name: Inspect built artifacts
-        run: |
-          echo "Artifacts:"
-          ls -l dist || true
-          echo "Wheel/metadata:"
-          unzip -p dist/*.whl */METADATA | grep -E '^Name:|^Version:' || true
-
-      - name: Upload workflow artifact (release dists)
+      - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
           path: dist/
 
-      - name: Attach dists to GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   pypi-publish:
-    name: Publish to PyPI
     runs-on: ubuntu-latest
-    needs: release-build
+    needs:
+      - release-build
     permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
       id-token: write
-      contents: read
+
+    # Dedicated environments with protections for publishing are strongly recommended.
+    # For more information, see: https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#deployment-protection-rules
     environment:
       name: pypi
+      # OPTIONAL: uncomment and update to include your PyPI project URL in the deployment status:
+      # url: https://pypi.org/p/YOURPROJECT
+      #
+      # ALTERNATIVE: if your GitHub Release name is the PyPI project version string
+      # ALTERNATIVE: exactly, uncomment the following line instead:
+      # url: https://pypi.org/project/YOURPROJECT/${{ github.event.release.name }}
+
     steps:
-      - name: Download build artifacts
+      - name: Retrieve release distributions
         uses: actions/download-artifact@v4
         with:
           name: release-dists
           path: dist/
 
-      - name: Publish to PyPI
+      - name: Publish release distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
-        env:
-          # Ensure you have PYPI_API_TOKEN configured in repository secrets
-          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
