@@ -1,10 +1,33 @@
+<div align="center">
+
+![DecoLogr Logo](decologr_logo_640.png)
+
+# Decologr
+
+**A lightweight, decorative logger for Python**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+
+</div>
+
 # decologr - Decorative Logger
 
-A logging utility with emoji decorations and structured message formatting.
+A single file logging utility with emoji decorations and structured message formatting.
+
+```python
+setup_logging(verbose=True, project_name="myproject")
+╭─────────── myproject ────────────╮
+│  myproject Application Starting  │
+╰──────────────────────────────────╯
+[...] INFO     ℹ️ myproject starting up with log file
+                             .../.myproject/logs/myproject-...
+```
 
 ## Features
 
 - **Emoji Decorations**: Automatic emoji decorations based on log level and message content
+- **Rich Console Formatting**: Beautiful, color-coded console output with syntax highlighting (optional)
 - **Structured Logging**: Support for JSON, parameters, and formatted messages
 - **Project-Aware**: Configurable project name for log file naming
 - **Backward Compatible**: Static method interface for easy migration
@@ -13,6 +36,22 @@ A logging utility with emoji decorations and structured message formatting.
 
 ```bash
 pip install decologr
+```
+
+### Optional: Rich Support
+
+For enhanced console output with colors and syntax highlighting:
+
+```bash
+pip install decologr[rich]
+```
+
+### Optional: Textual Support
+
+For interactive log viewing in editors like JDXI:
+
+```bash
+pip install decologr[textual]
 ```
 
 Or install from source:
@@ -25,7 +64,7 @@ pip install -e .
 ## Quick Start
 
 ```python
-from decologr import Logger, set_project_name, setup_logging
+from decologr import Decologr, set_project_name, setup_logging
 
 # Set project name (optional, defaults to "decologr")
 set_project_name("myproject")
@@ -34,9 +73,9 @@ set_project_name("myproject")
 setup_logging(verbose=True, project_name="myproject")
 
 # Use Logger
-Logger.info("Hello, world!")
-Logger.error("Something went wrong", exception=ValueError("test"))
-Logger.json({"key": "value"})
+Decologr.info("Hello, world!")
+Decologr.error("Something went wrong", exception=ValueError("test"))
+Decologr.json({"key": "value"})
 ```
 
 ## Usage
@@ -44,42 +83,118 @@ Logger.json({"key": "value"})
 ### Basic Logging
 
 ```python
-from decologr import Logger
+from decologr import Decologr
 
-Logger.info("Information message")
-Logger.warning("Warning message")
-Logger.error("Error message")
-Logger.debug("Debug message")
+Decologr.info("Information message")
+Decologr.warning("Warning message")
+Decologr.error("Error message")
+Decologr.debug("Debug message")
 ```
 
 ### Logging with Exceptions
 
 ```python
+from decologr import Decologr
 try:
     result = 1 / 0
 except ZeroDivisionError as e:
-    Logger.error("Division failed", exception=e)
+    Decologr.error("Division failed", exception=e)
+
+# With Rich installed, exceptions display with beautiful tracebacks
+try:
+    result = 1 / 0
+except ZeroDivisionError as e:
+    Decologr.error("Division failed", exception=e, use_rich_traceback=True)
+
+# Using log_exception helper function
+from decologr import log_exception
+try:
+    # some code
+except Exception as ex:
+    log_exception(ex, "Error initializing database", use_rich_traceback=True)
 ```
+
+**Rich Traceback Features** (when Rich is installed):
+- **Syntax-highlighted code**: Code snippets in tracebacks are syntax-highlighted
+- **Clear file paths**: File paths and line numbers are clearly marked
+- **Better visualization**: Improved formatting for stack frames
+- **Compact file logging**: Standard format still logged to files
 
 ### JSON Logging
 
 ```python
+from decologr import Decologr
 data = {"user": "alice", "action": "login"}
-Logger.json(data)
+Decologr.json(data)  # Compact JSON (or pretty if Rich is enabled)
+
+# With Rich installed, enable pretty-printing
+Decologr.json(data, pretty=True)  # Pretty-printed, syntax-highlighted JSON
+
+# Force compact format
+Decologr.json(data, pretty=False)  # Always compact JSON
+
+# Auto-detect (uses Rich if available)
+Decologr.json(data, pretty=None)  # Default behavior
 ```
+
+**Rich JSON Features** (when Rich is installed):
+- Pretty-printed formatting with proper indentation
+- Syntax highlighting for keys, values, and structure
+- Better readability for complex nested data
+- Compact JSON still logged to files for efficient storage
 
 ### Parameter Logging
 
 ```python
-Logger.parameter("User ID", user_id)
-Logger.parameter("Settings", {"theme": "dark", "lang": "en"})
+from decologr import Decologr
+
+Decologr.parameter("User ID", user_id)
+Decologr.parameter("Settings", {"theme": "dark", "lang": "en"})
+
+# With Rich installed, dictionaries display as tables
+config = {
+    "database": {"host": "localhost", "port": 5432},
+    "cache": {"enabled": True, "ttl": 3600}
+}
+Decologr.parameter("Configuration", config, use_rich=True)
+
+# Lists display as trees (especially nested structures)
+users = [
+    {"id": 1, "name": "Alice", "roles": ["admin"]},
+    {"id": 2, "name": "Bob", "roles": ["user"]}
+]
+Decologr.parameter("Users", users, use_rich=True)
 ```
+
+**Rich Parameter Features** (when Rich is installed):
+- **Tables for dictionaries**: Key-value pairs displayed in formatted tables
+- **Trees for lists**: Nested structures displayed as expandable trees
+- **Better visualization**: Color-coded values, proper formatting
+- **Compact file logging**: Still logs compact format to files
 
 ### Header Messages
 
 ```python
-Logger.header_message("Starting Processing")
+from decologr import Decologr
+Decologr.header_message("Starting Processing")
+
+# With Rich installed, headers display as formatted panels
+Decologr.header_message("Starting Processing", use_rich=True)
+
+# Custom title for Rich panel
+Decologr.header_message("Processing Complete", title="[bold green]Success[/bold green]", use_rich=True)
+
+# Different log levels show different border colors
+Decologr.header_message("Warning Section", level=logging.WARNING, use_rich=True)
+Decologr.header_message("Error Section", level=logging.ERROR, use_rich=True)
 ```
+
+**Rich Header Features** (when Rich is installed):
+- **Formatted panels**: Headers displayed as bordered panels
+- **Color-coded borders**: Border color matches log level (INFO=blue, WARNING=yellow, ERROR=red)
+- **Custom titles**: Optional custom titles for panels
+- **Better visual hierarchy**: Clear separation and distinction
+- **Text file logging**: Still logs separator lines to files
 
 ## Configuration
 
@@ -102,6 +217,55 @@ logger = setup_logging()
 
 # Setup with custom project name
 logger = setup_logging(project_name="myproject", verbose=True)
+
+# Enable Rich formatting (if Rich is installed)
+logger = setup_logging(use_rich=True, project_name="myproject")
+
+# Auto-detect Rich (uses Rich if available, otherwise falls back to plain)
+logger = setup_logging(use_rich=None, project_name="myproject")
+```
+
+### Rich Integration
+
+When Rich is installed and enabled, decologr provides:
+
+- **Color-coded log levels**: DEBUG (dim white), INFO (blue), WARNING (yellow), ERROR (red), CRITICAL (bold red)
+- **Syntax highlighting**: Automatic highlighting for code, file paths, and structured data
+- **Beautiful tracebacks**: Enhanced exception display with syntax highlighting
+- **Markup support**: Rich markup in log messages for additional formatting
+
+Rich formatting is **optional** - decologr works perfectly without it, maintaining full backward compatibility.
+
+## Textual Log Viewer
+
+When Textual is installed, decologr provides a beautiful log viewer component that can be integrated into programs like JDXI Editor:
+
+```python
+from decologr.viewer import create_log_viewer_widget
+from pathlib import Path
+
+# Create a viewer widget for embedding in your editor
+log_file = Path("~/.decologr/logs/myproject.log")
+viewer = create_log_viewer_widget(log_file=log_file)
+
+# Or run standalone viewer
+from decologr.viewer import run_log_viewer
+run_log_viewer(log_file)
+```
+
+**Textual Viewer Features**:
+- **Color-coded log levels**: Visual distinction for DEBUG, INFO, WARNING, ERROR, CRITICAL
+- **Search functionality**: Filter logs by text content
+- **Level filtering**: Show only logs above a certain level
+- **Formatted display**: Clean, readable table format
+- **Auto-scroll**: Automatically scrolls to latest logs
+- **Embeddable**: Can be integrated into editors and applications
+
+**Standalone Usage**:
+```bash
+python -m decologr.viewer <log_file>
+# Or use the most recent log file automatically
+python -m decologr.viewer
 ```
 
 ## API Reference
@@ -110,21 +274,65 @@ logger = setup_logging(project_name="myproject", verbose=True)
 
 All methods are static methods:
 
-- `Logger.info(message, *args, level=logging.INFO, stacklevel=3, silent=False)`
-- `Logger.debug(message, *args, level=logging.DEBUG, stacklevel=3, silent=False)`
-- `Logger.warning(message, *args, exception=None, level=logging.WARNING, stacklevel=4, silent=False)`
-- `Logger.error(message, *args, exception=None, level=logging.ERROR, stacklevel=4, silent=False)`
-- `Logger.json(data, silent=False)`
-- `Logger.parameter(message, parameter, float_precision=2, max_length=300, level=logging.INFO, stacklevel=4, silent=False)`
-- `Logger.header_message(message, level=logging.INFO, silent=False, stacklevel=3)`
-- `Logger.debug_info(successes, failures, stacklevel=3)`
+- `Decologr.info(message, *args, level=logging.INFO, stacklevel=3, silent=False)`
+- `Decologr.debug(message, *args, level=logging.DEBUG, stacklevel=3, silent=False)`
+- `Decologr.warning(message, *args, exception=None, level=logging.WARNING, stacklevel=4, silent=False, use_rich_traceback=None)` - Log warning
+  - `use_rich_traceback=True`: Use Rich traceback formatting (requires Rich)
+  - `use_rich_traceback=False`: Always use standard traceback
+  - `use_rich_traceback=None`: Auto-detect (uses Rich if available)
+- `Decologr.error(message, *args, exception=None, level=logging.ERROR, stacklevel=4, silent=False, use_rich_traceback=None)` - Log error
+  - `use_rich_traceback=True`: Use Rich traceback formatting (requires Rich)
+  - `use_rich_traceback=False`: Always use standard traceback
+  - `use_rich_traceback=None`: Auto-detect (uses Rich if available)
+- `Decologr.json(data, silent=False, pretty=None)` - Log JSON data
+  - `pretty=True`: Use Rich pretty-printing (requires Rich)
+  - `pretty=False`: Always use compact format
+  - `pretty=None`: Auto-detect (uses Rich if available)
+- `Decologr.parameter(message, parameter, float_precision=2, max_length=300, level=logging.INFO, stacklevel=4, silent=False, use_rich=None)` - Log structured parameter
+  - `use_rich=True`: Use Rich tables/trees (requires Rich)
+  - `use_rich=False`: Always use text-based formatting
+  - `use_rich=None`: Auto-detect (uses Rich if available)
+- `Decologr.header_message(message, level=logging.INFO, silent=False, stacklevel=3, use_rich=None, title=None)` - Log header message
+  - `use_rich=True`: Use Rich panel formatting (requires Rich)
+  - `use_rich=False`: Always use text-based separator lines
+  - `use_rich=None`: Auto-detect (uses Rich if available)
+  - `title`: Optional custom title for Rich panel
+- `Decologr.debug_info(successes, failures, stacklevel=3)`
 
 ### Functions
 
-- `setup_logging(verbose=False, project_name="decologr")` - Setup logging configuration
+- `setup_logging(verbose=False, project_name="decologr", use_rich=None)` - Setup logging configuration
+  - `use_rich`: If `True`, use Rich formatting (requires Rich to be installed)
+  - `use_rich`: If `None`, auto-detect and use Rich if available
+  - `use_rich`: If `False`, use plain text formatting
+- `log_exception(exception, message, stacklevel=4, use_rich_traceback=None)` - Log exception with message
+  - `use_rich_traceback`: Control Rich traceback formatting (same as error/warning methods)
 - `cleanup_logging(logger)` - Clean up logging handlers
 - `set_project_name(project_name)` - Set the project name for logging
 - `get_project_name()` - Get the current project name
+
+## Example Output:
+```python
+from decologr import Decologr, set_project_name, setup_logging
+
+# Set project name (optional, defaults to "decologr")
+set_project_name("myproject")
+# Setup logging (optional)
+setup_logging(verbose=True, project_name="myproject")
+╭─────────── myproject ────────────╮
+│  myproject Application Starting  │
+╰──────────────────────────────────╯
+[...] INFO     ℹ️ myproject starting up with log file
+                             .../.myproject/logs/myproject-...
+<Logger myproject (INFO)>
+# Use Logger
+Decologr.info("Hello, world!") 
+                    INFO     ℹ️ Hello, world!
+Decologr.error("Something went wrong", exception=ValueError("test"))
+{
+  "key": "value"
+}
+```
 
 ## License
 
@@ -132,5 +340,5 @@ MIT License
 
 ## Author
 
-Part of the mxflask project.
+Originally part of the JDXi Editor project.
 

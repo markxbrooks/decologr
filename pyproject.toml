@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "decologr"
-version = "0.1.0"
+version = "0.3.3"
 description = "Decorative Logger - A logging utility with emoji decorations"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -26,6 +26,9 @@ classifiers = [
 
 [project.optional-dependencies]
 numpy = ["numpy>=1.20.0"]
+rich = ["rich>=13.0.0"]
+textual = ["textual>=0.40.0"]
+all = ["numpy>=1.20.0", "rich>=13.0.0", "textual>=0.40.0"]
 
 [tool.setuptools.packages.find]
 where = ["."]
