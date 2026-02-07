@@ -53,6 +53,8 @@ try:
 except ImportError:
     HAS_NUMPY = False
 
+SCOPE_WIDTH = 20
+
 try:
     from rich.console import Console
     from rich.logging import RichHandler
@@ -84,6 +86,14 @@ LOGGING = True
 
 # Default project name - can be overridden
 _DEFAULT_PROJECT_NAME = "decologr"
+
+
+def format_scope(scope: str | None, width: int = 16) -> str:
+    if not scope:
+        return " " * (width + 2)
+
+    scope = scope[:width]  # hard clamp
+    return f"[{scope:<{width}}]"
 
 
 class _RichFileHandler(RotatingFileHandler):
@@ -456,6 +466,7 @@ class Decologr:
         stacklevel: int = 4,
         silent: bool = False,
         use_rich_traceback: Optional[bool] = None,
+        scope: str = None
     ) -> None:
         """
         Log an error message, optionally with an exception, and support lazy formatting.
@@ -556,6 +567,7 @@ class Decologr:
             stacklevel=stacklevel,
             silent=silent,
             level=level,
+            scope=scope
         )
 
     exception = error
@@ -569,6 +581,7 @@ class Decologr:
         stacklevel: int = 4,
         silent: bool = False,
         use_rich_traceback: Optional[bool] = None,
+        scope: str = None
     ) -> None:
         """
         Log a warning message, optionally with an exception, and support lazy formatting.
@@ -583,6 +596,7 @@ class Decologr:
             use_rich_traceback: If True, use Rich traceback formatting (when Rich is available).
                                If None, auto-detect (uses Rich if available).
                                If False, use standard traceback formatting.
+                               :param scope:
         """
         if silent:
             return
@@ -642,7 +656,7 @@ class Decologr:
                             root_logger.removeHandler(handler)
                 
                 # Log to file handlers
-                Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level)
+                Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level, scope=scope)
                 
                 # Restore console handlers
                 for handler, source_logger in console_handlers:
@@ -668,7 +682,7 @@ class Decologr:
         )
 
     @staticmethod
-    def json(data: Any, silent: bool = False, pretty: Optional[bool] = None) -> None:
+    def json(data: Any, silent: bool = False, pretty: Optional[bool] = None , scope: str = None) -> None:
         """
         Log a JSON object or JSON string with optional Rich formatting.
         
@@ -691,7 +705,10 @@ class Decologr:
                 data = json.loads(data)
             except json.JSONDecodeError:
                 Decologr.message(
-                    "Invalid JSON string provided.", level=logging.WARNING, stacklevel=3
+                    "Invalid JSON string provided.",
+                    level=logging.WARNING,
+                    stacklevel=3,
+                    scope=scope
                 )
                 return
 
@@ -771,21 +788,22 @@ class Decologr:
 
     @staticmethod
     def message(
-        format_string: str,
+        message: str,
         *args,
         level: int = logging.INFO,
         stacklevel: int = 3,
         silent: bool = False,
+        scope: str = None
     ) -> None:
 
         if args:
             # --- Only perform printf-formatting when args provided
             try:
-                formatted_message = format_string % args
+                formatted_message = message % args
             except Exception as ex:
-                formatted_message = f"{format_string}  [formatting failed: {ex}]"
+                formatted_message = f"{message}  [formatting failed: {ex}]"
         else:
-            formatted_message = format_string
+            formatted_message = message
 
         # Check if Rich handler is being used
         use_rich_colors = False
@@ -804,6 +822,8 @@ class Decologr:
                         break
 
         full_message = decorate_log_message(formatted_message, level, decorate=True, use_rich_colors=use_rich_colors)
+        scope_str = format_scope(scope)
+        full_message = f"{scope_str} {full_message}"
         if LOGGING and not silent:
             logger = logging.getLogger(_project_name)
             try:
@@ -823,6 +843,7 @@ class Decologr:
         stacklevel: int = 4,
         silent: bool = False,
         use_rich_traceback: Optional[bool] = None,
+        scope: str = None
     ) -> None:
         """
         Log a critical message, optionally with an exception, and support lazy formatting.
@@ -896,7 +917,7 @@ class Decologr:
                             root_logger.removeHandler(handler)
                 
                 # Log to file handlers
-                Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level)
+                Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level, scope=scope)
                 
                 # Restore console handlers
                 for handler, source_logger in console_handlers:
@@ -931,6 +952,7 @@ class Decologr:
         stacklevel: int = 4,
         silent: bool = False,
         use_rich: Optional[bool] = None,
+        scope: str = None
     ) -> None:
         """
         Log a structured message including type and a summarized value of a parameter.
@@ -947,6 +969,7 @@ class Decologr:
             use_rich: If True, use Rich tables/trees (when Rich is available).
                      If None, auto-detect (uses Rich if available).
                      If False, use text-based formatting.
+                     :param scope:
         """
 
         if silent:
@@ -1025,7 +1048,7 @@ class Decologr:
                     
             except Exception as e:
                 # Fallback to text-based formatting if Rich fails
-                Decologr.warning(f"Rich parameter formatting failed, using text format: {e}", stacklevel=stacklevel)
+                Decologr.warning(f"Rich parameter formatting failed, using text format: {e}", stacklevel=stacklevel, scope=scope)
                 use_rich_formatting = False
 
         # Fallback to text-based formatting
@@ -1098,7 +1121,7 @@ class Decologr:
         padded_type = f"{type_name:<12}"
         final_message = f"{padded_message} {padded_type} {formatted_value}".rstrip()
 
-        Decologr.message(final_message, silent=silent, stacklevel=stacklevel, level=level)
+        Decologr.message(final_message, silent=silent, stacklevel=stacklevel, level=level, scope=scope)
 
     @staticmethod
     def _format_parameter_value(param: Any, float_precision: int = 2, max_length: int = 300) -> str:
@@ -1272,6 +1295,7 @@ class Decologr:
         stacklevel: int = 3,
         use_rich: Optional[bool] = None,
         title: Optional[str] = None,
+        scope: str = None
     ) -> None:
         """
         Logs a visually distinct header message with separator lines.
@@ -1352,10 +1376,10 @@ class Decologr:
                 
                 # Log text version to file handlers
                 Decologr.message(
-                    f"\n{full_separator}", level=level, stacklevel=stacklevel, silent=False
+                    f"\n{full_separator}", level=level, stacklevel=stacklevel, silent=False, scope=scope
                 )
-                Decologr.message(f"{message}", level=level, stacklevel=stacklevel, silent=False)
-                Decologr.message(separator, level=level, stacklevel=stacklevel, silent=False)
+                Decologr.message(f"{message}", level=level, stacklevel=stacklevel, silent=False, scope=scope)
+                Decologr.message(separator, level=level, stacklevel=stacklevel, silent=False, scope=scope)
                 
                 # Restore console handlers
                 for handler, source_logger in console_handlers:
@@ -1365,7 +1389,7 @@ class Decologr:
                 
             except Exception as e:
                 # Fallback to text-based formatting if Rich panel fails
-                Decologr.warning(f"Rich header formatting failed, using text format: {e}", stacklevel=stacklevel)
+                Decologr.warning(f"Rich header formatting failed, using text format: {e}", scope=scope, stacklevel=stacklevel)
         
         # Fallback to text-based formatting (original behavior)
         full_separator = f"{'=' * 142}"
@@ -1378,10 +1402,11 @@ class Decologr:
         Decologr.message(separator, level=level, stacklevel=stacklevel, silent=silent)
 
     @staticmethod
-    def debug_info(successes: list, failures: list, stacklevel: int = 3) -> None:
+    def debug_info(successes: list, failures: list, stacklevel: int = 3, scope: str = None) -> None:
         """
         Logs debug information about the parsed SysEx data.
 
+        :param scope: str Formatted scope e.g. [ProgramEditor] Updating SysEx...
         :param stacklevel: int - stacklevel
         :param successes: list – Parameters successfully decoded.
         :param failures: list – Parameters that failed decoding.
@@ -1394,13 +1419,14 @@ class Decologr:
 
         total = len(successes) + len(failures)
         success_rate = (len(successes) / total * 100) if total else 0.0
-
-        Decologr.message(
-            f"Successes ({len(successes)}): {successes}", stacklevel=stacklevel
-        )
-        Decologr.message(f"Failures ({len(failures)}): {failures}", stacklevel=stacklevel)
-        Decologr.message(f"Success Rate: {success_rate:.1f}%", stacklevel=stacklevel)
-        Decologr.message("=" * 100, stacklevel=3)
+        messages = [f"Successes ({len(successes)}): {successes}",
+                    f"Failures ({len(failures)}): {failures}",
+                    f"Success Rate: {success_rate:.1f}%",
+                    "=" * 100]
+        for message in messages:
+            Decologr.message(
+                message, stacklevel=stacklevel, scope=scope
+            )
 
 
 def log_exception(exception: Exception, message: str, stacklevel: int = 4, use_rich_traceback: Optional[bool] = None) -> None:
