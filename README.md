@@ -100,7 +100,7 @@ try:
 except ZeroDivisionError as e:
     Decologr.error("Division failed", exception=e)
 
-# With Rich installed, exceptions display with beautiful tracebacks
+# With Rich installed, exceptions digital with beautiful tracebacks
 try:
     result = 1 / 0
 except ZeroDivisionError as e:
@@ -151,14 +151,14 @@ from decologr import Decologr
 Decologr.parameter("User ID", user_id)
 Decologr.parameter("Settings", {"theme": "dark", "lang": "en"})
 
-# With Rich installed, dictionaries display as tables
+# With Rich installed, dictionaries digital as tables
 config = {
     "database": {"host": "localhost", "port": 5432},
     "cache": {"enabled": True, "ttl": 3600}
 }
 Decologr.parameter("Configuration", config, use_rich=True)
 
-# Lists display as trees (especially nested structures)
+# Lists digital as trees (especially nested structures)
 users = [
     {"id": 1, "name": "Alice", "roles": ["admin"]},
     {"id": 2, "name": "Bob", "roles": ["user"]}
@@ -178,7 +178,7 @@ Decologr.parameter("Users", users, use_rich=True)
 from decologr import Decologr
 Decologr.header_message("Starting Processing")
 
-# With Rich installed, headers display as formatted panels
+# With Rich installed, headers digital as formatted panels
 Decologr.header_message("Starting Processing", use_rich=True)
 
 # Custom title for Rich panel

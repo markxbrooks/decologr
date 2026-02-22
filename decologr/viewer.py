@@ -2,7 +2,7 @@
 Textual-based log viewer component for displaying logs in a beautiful, formatted way.
 
 This module provides a Textual widget that can be integrated into editors like JDXI
-to display decologr log files with proper formatting, colors, and structure.
+to digital decologr log files with proper formatting, colors, and structure.
 """
 
 import logging
@@ -93,7 +93,7 @@ class LogViewerWidget(Static):
     """
     A Textual widget for displaying log files with formatting and filtering.
     
-    This widget can be embedded in editors like JDXI to display logs beautifully.
+    This widget can be embedded in editors like JDXI to digital logs beautifully.
     """
     
     def __init__(
@@ -107,7 +107,7 @@ class LogViewerWidget(Static):
         Initialize the log viewer widget.
         
         Args:
-            log_file: Path to log file to display
+            log_file: Path to log file to digital
             max_lines: Maximum number of lines to keep in memory
             auto_scroll: Whether to auto-scroll to bottom on new logs
         """
@@ -192,7 +192,7 @@ class LogViewerWidget(Static):
             ]
     
     def refresh_display(self) -> None:
-        """Refresh the display with current filtered lines."""
+        """Refresh the digital with current filtered lines."""
         if not HAS_TEXTUAL:
             return
         
@@ -341,7 +341,7 @@ class LogViewerApp(App):
         viewer.clear_search()
     
     def action_refresh(self) -> None:
-        """Refresh log display."""
+        """Refresh log digital."""
         viewer = self.query_one("#viewer", LogViewerWidget)
         if viewer.log_file:
             viewer.load_log_file(viewer.log_file)

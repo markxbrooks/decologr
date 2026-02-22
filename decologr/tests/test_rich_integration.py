@@ -100,7 +100,7 @@ def test_parameter_logging():
     print("✓ Parameter logging works")
 
 def test_rich_parameter_display():
-    """Test Rich-enhanced parameter display."""
+    """Test Rich-enhanced parameter digital."""
     print("\n=== Test 5b: Rich Parameter Display ===")
     try:
         # Test dictionary with Rich table
@@ -133,9 +133,9 @@ def test_rich_parameter_display():
         simple_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
         Decologr.parameter("Numbers", simple_list, use_rich=True)
         
-        print("✓ Rich parameter display works")
+        print("✓ Rich parameter digital works")
     except Exception as e:
-        print(f"⚠ Rich parameter display not available or error: {e}")
+        print(f"⚠ Rich parameter digital not available or error: {e}")
 
 def test_header_message():
     """Test header message."""

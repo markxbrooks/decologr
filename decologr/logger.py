@@ -495,7 +495,7 @@ class Decologr:
                 use_rich = True
 
         if exception is not None and use_rich:
-            # Use Rich traceback for beautiful exception display
+            # Use Rich traceback for beautiful exception digital
             try:
                 console = Console(stderr=False)
                 
@@ -611,7 +611,7 @@ class Decologr:
                 use_rich = True
 
         if exception is not None and use_rich:
-            # Use Rich traceback for beautiful exception display
+            # Use Rich traceback for beautiful exception digital
             try:
                 console = Console(stderr=False)
                 
@@ -872,7 +872,7 @@ class Decologr:
                 use_rich = True
 
         if exception is not None and use_rich:
-            # Use Rich traceback for beautiful exception display
+            # Use Rich traceback for beautiful exception digital
             try:
                 console = Console(stderr=False)
                 
@@ -992,7 +992,7 @@ class Decologr:
                     table.add_column("Value", style="green", no_wrap=False)
                     
                     for key, value in parameter.items():
-                        # Format value for display
+                        # Format value for digital
                         value_str = Decologr._format_parameter_value(value, float_precision, max_length)
                         table.add_row(str(key), value_str)
                     
@@ -1126,7 +1126,7 @@ class Decologr:
     @staticmethod
     def _format_parameter_value(param: Any, float_precision: int = 2, max_length: int = 300) -> str:
         """
-        Format a parameter value for display in Rich tables/trees.
+        Format a parameter value for digital in Rich tables/trees.
         
         Args:
             param: The value to format
@@ -1332,7 +1332,7 @@ class Decologr:
                 use_rich_panel = True
 
         if use_rich_panel:
-            # Use Rich Panel for beautiful header display
+            # Use Rich Panel for beautiful header digital
             try:
                 console = Console(stderr=False)
                 

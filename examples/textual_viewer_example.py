@@ -14,7 +14,7 @@ def create_viewer_for_jdxi(log_file_path: str):
     Create a log viewer widget that can be embedded in JDXI editor.
     
     Args:
-        log_file_path: Path to the log file to display
+        log_file_path: Path to the log file to digital
     """
     log_file = Path(log_file_path).expanduser()
     widget = create_log_viewer_widget(log_file=log_file)
