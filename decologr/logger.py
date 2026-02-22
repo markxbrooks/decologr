@@ -797,13 +797,17 @@ class Decologr:
     ) -> None:
 
         if args:
-            # --- Only perform printf-formatting when args provided
             try:
-                formatted_message = message % args
+                # Prefer printf formatting when placeholders exist
+                if "%" in message:
+                    formatted_message = message % args
+                else:
+                    # Structured logging style: join arguments
+                    formatted_message = " ".join([str(message), *(str(a) for a in args)])
             except Exception as ex:
-                formatted_message = f"{message}  [formatting failed: {ex}]"
+                formatted_message = f"{message} {' '.join(map(str, args))} [formatting failed: {ex}]"
         else:
-            formatted_message = message
+            formatted_message = str(message)
 
         # Check if Rich handler is being used
         use_rich_colors = False
