@@ -38,6 +38,7 @@ ValueError: test
   "key": "value"
 }
 """
+from __future__ import annotations
 
 import json
 import logging
@@ -214,7 +215,7 @@ def setup_logging(
             file_handler = _RichFileHandler(
                 str(log_file),
                 maxBytes=1024 * 1024,  # 1MB per file
-                backupCount=5,  # Keep 5 backup wrappers
+                backupCount=5,  # Keep 5 backup files
                 encoding="utf-8",
             )
         else:
@@ -222,7 +223,7 @@ def setup_logging(
             file_handler = RotatingFileHandler(
                 str(log_file),
                 maxBytes=1024 * 1024,  # 1MB per file
-                backupCount=5,  # Keep 5 backup wrappers
+                backupCount=5,  # Keep 5 backup files
                 encoding="utf-8",
             )
             file_formatter = logging.Formatter(

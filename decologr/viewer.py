@@ -1,7 +1,7 @@
 """
 Textual-based log viewer component for displaying logs in a beautiful, formatted way.
 
-This module provides a Textual widget that can be integrated into editors like JDXI
+This module provides a Textual line_edit that can be integrated into editors like JDXI
 to display decologr log files with proper formatting, colors, and structure.
 """
 
@@ -91,9 +91,9 @@ def parse_log_line(line: str) -> Optional[Tuple[int, str, int, str, str]]:
 
 class LogViewerWidget(Static):
     """
-    A Textual widget for displaying log files with formatting and filtering.
+    A Textual line_edit for displaying log files with formatting and filtering.
     
-    This widget can be embedded in editors like JDXI to display logs beautifully.
+    This line_edit can be embedded in editors like JDXI to display logs beautifully.
     """
     
     def __init__(
@@ -104,7 +104,7 @@ class LogViewerWidget(Static):
         **kwargs
     ):
         """
-        Initialize the log viewer widget.
+        Initialize the log viewer line_edit.
         
         Args:
             log_file: Path to log file to display
@@ -133,7 +133,7 @@ class LogViewerWidget(Static):
             yield DataTable(id="log-table")
     
     def on_mount(self) -> None:
-        """Called when widget is mounted."""
+        """Called when line_edit is mounted."""
         if not HAS_TEXTUAL:
             return
         
@@ -362,8 +362,8 @@ def create_log_viewer_widget(log_file: Optional[Path] = None) -> LogViewerWidget
         from decologr.viewer import create_log_viewer_widget
         from pathlib import Path
         
-        widget = create_log_viewer_widget(Path("~/.decologr/logs/myapp.log"))
-        # Embed widget in your editor UI
+        line_edit = create_log_viewer_widget(Path("~/.decologr/logs/myapp.log"))
+        # Embed line_edit in your editor UI
         ```
     """
     if not HAS_TEXTUAL:
