@@ -42,6 +42,7 @@ ValueError: test
 import json
 import logging
 import sys
+import traceback
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -512,13 +513,13 @@ class Decologr:
                 console.print(f"[bold red]❌ {formatted_message}[/bold red]")
                 
                 # Print Rich traceback
-                traceback = Traceback.from_exception(
+                rich_tb = Traceback.from_exception(
                     type(exception),
                     exception,
                     exception.__traceback__,
                     show_locals=False,  # Don't show local variables by default
                 )
-                console.print(traceback)
+                console.print(rich_tb)
                 
                 # Also log compact version to file handlers
                 # Format exception info for file logging
@@ -540,9 +541,10 @@ class Decologr:
                             console_handlers.append((handler, root_logger))
                             root_logger.removeHandler(handler)
                 
-                # Log to file handlers
+                # Log to file handlers: compact message + full traceback text
                 Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level)
-                
+                Decologr.message(traceback.format_exc(), stacklevel=stacklevel, silent=False, level=level)
+
                 # Restore console handlers
                 for handler, source_logger in console_handlers:
                     source_logger.addHandler(handler)
@@ -569,6 +571,7 @@ class Decologr:
             level=level,
             scope=scope
         )
+        traceback.print_exc()
 
     exception = error
 
@@ -1455,6 +1458,7 @@ def log_exception(exception: Exception, message: str, stacklevel: int = 4, use_r
             log_exception(ex, "Error initializing scheduler database")
     """
     Decologr.error(message, exception=exception, stacklevel=stacklevel, use_rich_traceback=use_rich_traceback)
+    traceback.print_exc()
 
 
 def log_json(data: Dict[str, Any], silent: bool = False) -> None:
