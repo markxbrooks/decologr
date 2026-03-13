@@ -8,10 +8,10 @@ into the JDXI editor or any other application.
 from pathlib import Path
 from decologr.viewer import create_log_viewer_widget, LogViewerWidget
 
-# Example 1: Create a viewer widget for embedding
+# Example 1: Create a viewer line_edit for embedding
 def create_viewer_for_jdxi(log_file_path: str):
     """
-    Create a log viewer widget that can be embedded in JDXI editor.
+    Create a log viewer line_edit that can be embedded in JDXI editor.
     
     Args:
         log_file_path: Path to the log file to display
@@ -21,7 +21,7 @@ def create_viewer_for_jdxi(log_file_path: str):
     return widget
 
 
-# Example 2: Use the widget in a Textual app
+# Example 2: Use the line_edit in a Textual app
 def example_jdxi_integration():
     """
     Example of how JDXI editor might integrate the log viewer.
@@ -34,7 +34,7 @@ def example_jdxi_integration():
             """Example JDXI editor integration."""
             
             def compose(self) -> ComposeResult:
-                # Create the log viewer widget
+                # Create the log viewer line_edit
                 log_file = Path.home() / ".decologr" / "logs" / "myproject-*.log"
                 viewer = create_log_viewer_widget(log_file=log_file)
                 yield Container(viewer)
