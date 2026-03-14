@@ -657,7 +657,7 @@ class Decologr:
                     if isinstance(handler, (RichHandler, logging.StreamHandler)):
                         if not any(h == handler for h, _ in console_handlers):
                             console_handlers.append((handler, root_logger))
-                            root_logger.removeHandler(handler)
+                            root_logger.removeHandler(handler)\
                 
                 # Log to file handlers
                 Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level, scope=scope)
