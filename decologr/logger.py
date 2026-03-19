@@ -38,10 +38,12 @@ ValueError: test
   "key": "value"
 }
 """
+from __future__ import annotations
 
 import json
 import logging
 import sys
+import traceback
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
@@ -176,7 +178,7 @@ def setup_logging(
                  If True and Rich is not available, will raise ImportError.
     
     Returns:
-        Logger instance
+        Decologr instance
     """
     try:
         # Create logs directory in user's home directory
@@ -214,7 +216,7 @@ def setup_logging(
             file_handler = _RichFileHandler(
                 str(log_file),
                 maxBytes=1024 * 1024,  # 1MB per file
-                backupCount=5,  # Keep 5 backup wrappers
+                backupCount=5,  # Keep 5 backup files
                 encoding="utf-8",
             )
         else:
@@ -222,7 +224,7 @@ def setup_logging(
             file_handler = RotatingFileHandler(
                 str(log_file),
                 maxBytes=1024 * 1024,  # 1MB per file
-                backupCount=5,  # Keep 5 backup wrappers
+                backupCount=5,  # Keep 5 backup files
                 encoding="utf-8",
             )
             file_formatter = logging.Formatter(
@@ -434,7 +436,7 @@ def _is_rich_handler_available() -> bool:
 
 
 def set_project_name(project_name: str) -> None:
-    """Set the project name used by Logger for logging.
+    """Set the project name used by Decologr for logging.
     
     Args:
         project_name: Name of the project (e.g., "mxlib", "mxpandda")
@@ -512,13 +514,13 @@ class Decologr:
                 console.print(f"[bold red]❌ {formatted_message}[/bold red]")
                 
                 # Print Rich traceback
-                traceback = Traceback.from_exception(
+                rich_tb = Traceback.from_exception(
                     type(exception),
                     exception,
                     exception.__traceback__,
                     show_locals=False,  # Don't show local variables by default
                 )
-                console.print(traceback)
+                console.print(rich_tb)
                 
                 # Also log compact version to file handlers
                 # Format exception info for file logging
@@ -540,9 +542,10 @@ class Decologr:
                             console_handlers.append((handler, root_logger))
                             root_logger.removeHandler(handler)
                 
-                # Log to file handlers
+                # Log to file handlers: compact message + full traceback text
                 Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level)
-                
+                Decologr.message(traceback.format_exc(), stacklevel=stacklevel, silent=False, level=level)
+
                 # Restore console handlers
                 for handler, source_logger in console_handlers:
                     source_logger.addHandler(handler)
@@ -569,6 +572,7 @@ class Decologr:
             level=level,
             scope=scope
         )
+        traceback.print_exc()
 
     exception = error
 
@@ -653,7 +657,7 @@ class Decologr:
                     if isinstance(handler, (RichHandler, logging.StreamHandler)):
                         if not any(h == handler for h, _ in console_handlers):
                             console_handlers.append((handler, root_logger))
-                            root_logger.removeHandler(handler)
+                            root_logger.removeHandler(handler)\
                 
                 # Log to file handlers
                 Decologr.message(file_message, stacklevel=stacklevel, silent=False, level=level, scope=scope)
@@ -1455,6 +1459,7 @@ def log_exception(exception: Exception, message: str, stacklevel: int = 4, use_r
             log_exception(ex, "Error initializing scheduler database")
     """
     Decologr.error(message, exception=exception, stacklevel=stacklevel, use_rich_traceback=use_rich_traceback)
+    traceback.print_exc()
 
 
 def log_json(data: Dict[str, Any], silent: bool = False) -> None:

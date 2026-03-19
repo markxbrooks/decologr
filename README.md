@@ -244,7 +244,7 @@ When Textual is installed, decologr provides a beautiful log viewer component th
 from decologr.viewer import create_log_viewer_widget
 from pathlib import Path
 
-# Create a viewer widget for embedding in your editor
+# Create a viewer line_edit for embedding in your editor
 log_file = Path("~/.decologr/logs/myproject.log")
 viewer = create_log_viewer_widget(log_file=log_file)
 
