@@ -172,7 +172,7 @@ class LogViewerWidget(Static):
             if HAS_TEXTUAL:
                 self.notify(f"Error loading log file: {e}", severity="error")
     
-    def apply_filters(self) -> None:
+    def apply_tfilters(self) -> None:
         """Apply current filters and search to log lines."""
         self.filtered_lines = self.log_lines
         
