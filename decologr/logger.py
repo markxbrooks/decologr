@@ -166,7 +166,7 @@ def cleanup_logging(logger: logging.Logger) -> None:
 def setup_logging(
     verbose: bool = False,
     project_name: str = _DEFAULT_PROJECT_NAME,
-    use_rich: Optional[bool] = None,
+    use_rich: Optional[bool] = False,
 ) -> object:
     """Set up logging configuration
     
