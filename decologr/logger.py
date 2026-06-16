@@ -199,7 +199,7 @@ def setup_logging(
 
         # Determine if we should use Rich (needed for file handler too)
         should_use_rich = False
-        if use_rich is True:
+        if use_rich:
             if not HAS_RICH:
                 raise ImportError(
                     "Rich is requested but not installed. Install with: pip install decologr[rich]"
